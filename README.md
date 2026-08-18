@@ -144,8 +144,11 @@ Notes for `catalog.open_sample`: `resources.kinds` filters *derived* artifacts
   `~/.VC3D/remote_cache/open_data/segments/<sample>/patches/`; re-attach it with
   `segments.attach {"location": <that path>}` (or grow any new patch, which
   re-attaches the folder).
-- Streaming AI-prediction channels (Lasagna) into the catalog project is fixed by
-  **[requires open [PR #1356](https://github.com/ScrollPrize/villa/pull/1356)]**, with correct level registration from [PR #1347](https://github.com/ScrollPrize/villa/pull/1347) (merged).
+- Streaming AI-prediction channels (Lasagna) into the catalog project **works on
+  current main** (fixed 2026-08-19 by [PR #1527](https://github.com/ScrollPrize/villa/pull/1527), verified cold on PHerc0125: all four
+  channel volumes attach), with correct level registration from [PR #1347](https://github.com/ScrollPrize/villa/pull/1347) (merged).
+  On builds older than `bf57b86` the attach fails deterministically
+  ([villa#1355](https://github.com/ScrollPrize/villa/issues/1355)) — rebuild from main if you hit `no .zarray or zarr.json found`.
 
 ## 5. Stream chunks yourself (Python, 5 lines)
 
