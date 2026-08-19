@@ -153,6 +153,29 @@ Notes for `catalog.open_sample`: `resources.kinds` filters *derived* artifacts
   On builds older than `bf57b86` the attach fails deterministically
   ([villa#1355](https://github.com/ScrollPrize/villa/issues/1355)) — rebuild from main if you hit `no .zarray or zarr.json found`.
 
+### Bonus: the Lasagna fit service runs on streamed catalog data too
+
+With a catalog sample open (§4), the fit-optimizer service can be started and
+fed entirely from the streamed cache — no local dataset preparation:
+
+```
+# fit_service.py isn't found from a custom build dir; point VC3D at it:
+LASAGNA_SERVICE_PATH=<villa>/lasagna/fit_service.py  QT_QPA_PLATFORM=offscreen  ./VC3D --agent-bridge ...
+
+lasagna.ensure_service {"pythonPath": "<venv-with-torch>/bin/python"}
+   → service starts and auto-discovers the cached catalog manifest as its dataset
+lasagna.list_datasets            → the sample's .lasagna.json, served from the cache
+lasagna.start_optimization {"mode": "new_model", "seed": {...},
+                            "configPath": "<villa>/lasagna/configs/init_corr.json"}
+   → job queued; poll lasagna.jobs
+```
+
+Every step above was live-verified on PHerc0332 (main `bf57b86`). `configPath`
+is required headlessly — without it you get `Lasagna config not found: (none
+selected)`. The fit itself needs a working CUDA setup: the service deliberately
+refuses CPU fallback, and its job error (kept queryable in `lasagna.jobs`)
+tells you exactly what's missing.
+
 ## 5. Stream chunks yourself (Python, 5 lines)
 
 For analysis outside VC3D, plain `zarr` + anonymous S3 streams the same data:
