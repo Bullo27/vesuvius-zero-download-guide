@@ -144,6 +144,9 @@ Notes for `catalog.open_sample`: `resources.kinds` filters *derived* artifacts
   `~/.VC3D/remote_cache/open_data/segments/<sample>/patches/`; re-attach it with
   `segments.attach {"location": <that path>}` (or grow any new patch, which
   re-attaches the folder).
+- `fiber.create_atlas` can't run on catalog-streamed samples yet: published
+  lasagna manifests carry no `init_shell_dir`, and there is no local-shell
+  override ([villa#1530](https://github.com/ScrollPrize/villa/issues/1530)). Fiber import/list/export and tracing channels work.
 - Streaming AI-prediction channels (Lasagna) into the catalog project **works on
   current main** (fixed 2026-08-19 by [PR #1527](https://github.com/ScrollPrize/villa/pull/1527), verified cold on PHerc0125: all four
   channel volumes attach), with correct level registration from [PR #1347](https://github.com/ScrollPrize/villa/pull/1347) (merged).
