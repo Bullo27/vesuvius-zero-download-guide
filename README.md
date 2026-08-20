@@ -172,9 +172,20 @@ lasagna.start_optimization {"mode": "new_model", "seed": {...},
 
 Every step above was live-verified on PHerc0332 (main `bf57b86`). `configPath`
 is required headlessly — without it you get `Lasagna config not found: (none
-selected)`. The fit itself needs a working CUDA setup: the service deliberately
-refuses CPU fallback, and its job error (kept queryable in `lasagna.jobs`)
-tells you exactly what's missing.
+selected)`. Two env prerequisites: the service venv needs `tensorstore`, and
+the first fit JIT-compiles a small CUDA kernel, so a CUDA toolkit matching
+your torch build must be on `CUDA_HOME` (the service deliberately refuses CPU
+fallback; job errors stay queryable in `lasagna.jobs`).
+
+On today's *published* artifacts a from-scratch fit still stops at manifest
+gaps — no `init_shell_dir`, empty `umbilicus_json`, and a store-layout mismatch
+between VC3D's cache and the fit's loader
+([villa#1530](https://github.com/ScrollPrize/villa/issues/1530) /
+[villa#1540](https://github.com/ScrollPrize/villa/issues/1540)). The chain
+itself is proven whole: with those gaps hand-composed, a full 3-stage
+`new_model` fit **completes** on streamed PHerc0332 data (~20–25 it/s on an
+RTX 3060, 6.5 MiB streamed per channel, exported tifxyz landing back in the
+project) — the constructive run is written up in the villa#1540 thread.
 
 ## 5. Stream chunks yourself (Python, 5 lines)
 
