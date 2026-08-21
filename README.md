@@ -96,9 +96,12 @@ Notes:
   `--cache-gb`. That is exactly what you want for zero-download work, but it also
   means there is no on-disk reuse — each run re-streams the chunks it needs.
 - `--prefetch-remote` fetches every chunk the surface crosses in one planned
-  batch before rendering (measured on the §2 patch: `Prefetch: 27 chunk(s)`,
-  render phase 0.9 → 71.9 bands/s), which is a real speed-up *within* a run — but
-  it persists nothing either. Its help text mentions an "existing staged cache",
+  batch *before* rendering starts (measured on the §2 patch: `Prefetch: 27
+  chunk(s)`, render phase 0.9 → 71.9 bands/s). It moves the wait rather than
+  removing it: on this small surface the total run was **slower** (12.5 s vs
+  7.1 s), because lazy streaming overlaps fetching with rendering. Expect it to
+  pay off only on large surfaces where batched fetches beat serial ones — and it
+  persists nothing either. Its help text mentions an "existing staged cache",
   and `--remote-url`'s help calls itself optional "if `--volume` cache already
   records it" via a `.remote_source.json` marker; nothing in the repository ever
   writes that marker, so both of those paths are currently unreachable.
