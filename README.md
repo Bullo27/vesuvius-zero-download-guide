@@ -9,7 +9,8 @@ on demand, over anonymous HTTPS/S3. A laptop with a few GB of disk is enough to
 grow real segments on an 11-metre scroll scan.
 
 Everything below was **run and verified against live open data**
-(`villa` main @ `aab644c9c`, 2026-08-15/16, PHercParis4). Commands are copy-paste.
+(`villa` main @ `aab644c9c`, 2026-08-15/16, PHercParis4; §2–§3 re-run on main
+`df05b9634`, 2026-08-21). Commands are copy-paste.
 Sections that depend on fixes still under review are marked **[requires PR #x]**.
 
 ![VC3D streaming a PHercParis4 published segment — surface view + slice views, all remote](vc3d-streaming-session.png)
@@ -72,8 +73,10 @@ seconds; 30 ≈ 10 cm² in ~1 min on 4 threads).
 
 ## 3. Render a streamed segment to images
 
-Unlike the grow tool, the renderer takes the remote URL via `--remote-url`, with
-`--volume` naming a local chunk-cache directory it creates and reuses:
+Unlike the grow tool, the renderer takes the remote URL via `--remote-url`.
+`-v/--volume` is still **required**, but when you stream it is only consulted as
+a fallback source — it is never created, populated or reused — so point it at any
+empty directory:
 
 ```bash
 mkdir -p render_cache
@@ -87,6 +90,18 @@ Verified: streams only the chunks the surface crosses and writes per-slice TIFFs
 (the 1.4 cm² patch from §2 renders 360×360 with real papyrus texture in seconds).
 Notes:
 
+- **A streamed render keeps nothing on disk.** Re-measured on main `df05b9634`:
+  a full 360×360 render streamed its 3 bands in ~7 s and left *zero* new files in
+  both the `-v` directory and `~/.VC3D`. The chunk cache is RAM-only, sized by
+  `--cache-gb`. That is exactly what you want for zero-download work, but it also
+  means there is no on-disk reuse — each run re-streams the chunks it needs.
+- `--prefetch-remote` fetches every chunk the surface crosses in one planned
+  batch before rendering (measured on the §2 patch: `Prefetch: 27 chunk(s)`,
+  render phase 0.9 → 71.9 bands/s), which is a real speed-up *within* a run — but
+  it persists nothing either. Its help text mentions an "existing staged cache",
+  and `--remote-url`'s help calls itself optional "if `--volume` cache already
+  records it" via a `.remote_source.json` marker; nothing in the repository ever
+  writes that marker, so both of those paths are currently unreachable.
 - **Pass `--voxel-size` explicitly for streamed volumes.** On current main a
   streaming-only setup finds no local metadata and falls back to
   `Voxel size: 1.0` with a warning, which mis-scales physical units downstream
@@ -209,7 +224,9 @@ stream, see [`scroll-data-audit`](https://github.com/Bullo27/scroll-data-audit)
 ## Provenance & disclosure
 
 Written from live, executed sessions against the public open-data servers
-(main @ `aab644c9c`, Aug 2026); every command and number above comes from an
+(main @ `aab644c9c`, Aug 2026; §2–§3 re-verified on `df05b9634` after the
+remote-cache rewire in [PR #1554](https://github.com/ScrollPrize/villa/pull/1554));
+every command and number above comes from an
 actual run, and the sharp-edges list links the upstream issue for each caveat.
 Prepared by Matteo Bulloni with AI assistance (Claude) as part of ongoing
 tooling/data-integrity work on the Vesuvius Challenge.
